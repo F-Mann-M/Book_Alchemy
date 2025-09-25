@@ -6,13 +6,7 @@ from datetime import date
 # Builds the framework
 app = Flask(__name__)
 
-# Connet URI with DBMS
 basedir = os.path.abspath(os.path.dirname(__file__))
-# __file__ path of current python file
-# os.path.dirname(path) the current folder that contains the file
-# os.path.abspath() makes sure to get the absolut path
-
-# creat connection to database with absolute path
 app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.join(basedir, 'data/library.sqlite')}"
 
 # connect SQLAlchemy with app (Flask)
@@ -21,12 +15,14 @@ db.init_app(app)
 
 @app.route("/", methods=["GET"]) # decorator
 def home():
+    """ return list of books to landing page"""
     books = db.session.query(Book).all()
     return render_template("home.html", books=books)
 
 
 @app.route("/search", methods=["GET"])
 def search():
+    """ gets query parameters, search for title with similar content"""
     # get query parameters
     search_for = request.args.get("search", "")
     books = db.session.query(Book) \
@@ -42,6 +38,7 @@ def search():
 
 @app.route("/sorted", methods=["GET"])
 def sort():
+    """ Get request and return sorted booklist"""
     sorted_list = []
 
     # get books
@@ -64,6 +61,11 @@ def sort():
 
 @app.route("/add_author", methods=["GET", "POST"])
 def add_author():
+    """
+    Gets information about author from a html form (POST),
+    add data to author table,
+    get back to library (home)
+    """
     message = "Add author."
     #get data from form
     if request.method == "POST":
@@ -88,6 +90,13 @@ def add_author():
 
 @app.route("/add_book", methods=["GET", "POST"])
 def add_book():
+    """
+    If GET request render add_book.html,
+    if POST request collect data about book,
+    add data to author table
+    return to library (home)
+    """
+
     message = "Add new Book"
 
     #get author_id
@@ -95,28 +104,45 @@ def add_book():
 
     #get data from form
     if request.method == "POST":
-        isbn = request.form.get("isbn")
-        title = request.form.get("title")
-        year = request.form.get("year")
-        author = request.form.get("author")
+        try:
+            isbn = request.form.get("isbn")
+            title = request.form.get("title")
+            year = request.form.get("year")
+            author = request.form.get("author")
 
-        print(author)
-        #add book to table
-        new_book = Book(
-            isbn = isbn,
-            title = title,
-            publication_year = year,
-            author_id = author)
-        db.session.add(new_book)
-        db.session.commit()
-        message = f"Book '{title}' was successfully added to library."
+            if not isbn or not isbn.isdigit():
+                raise ValueError("ISBN must be a number.")
 
-    return render_template("home.html", message=message, authors=authors)
+            if not title:
+                raise ValueError("Title is missing")
+
+            if not year or not year.isdigit():
+                raise ValueError("Year must be a number")
+
+            #add book to table
+            new_book = Book(
+                isbn = isbn,
+                title = title,
+                publication_year = year,
+                author_id = author)
+            db.session.add(new_book)
+            db.session.commit()
+            message = f"Book '{title}' was successfully added to library."
+
+        except ValueError as e:
+            message = f"Error: {e}"
+
+    return render_template("add_book.html", message=message, authors=authors)
 
 
 @app.route("/book/<int:book_id>/delete", methods=["POST"])
 def delete_book(book_id):
-
+    """
+    Takes in book id by POST,
+    checks if book with book_id is in database,
+    deletes book form database,
+    reloads library and returns to home
+    """
     # delete book
     book = db.session.query(Book).filter(Book.id == book_id).first() #make sure book is in database
     if book:
