@@ -1,18 +1,26 @@
 from flask import Flask, render_template, request
 from flask_sqlalchemy import SQLAlchemy
-
 from data_models import db, Author, Book
 import os
 from datetime import date
+
+# Builds the framework
 app = Flask(__name__)
 
 # Connet URI with DBMS
 basedir = os.path.abspath(os.path.dirname(__file__))
+# __file__ path of current python file
+# os.path.dirname(path) the current folder that contains the file
+# os.path.abspath() makes sure to get the absolut path
+
+# creat connection to database with absolute path
 app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.join(basedir, 'data/library.sqlite')}"
+
+# connect SQLAlchemy with app (Flask)
 db.init_app(app)
 
 
-@app.route("/", methods=["GET"])
+@app.route("/", methods=["GET"]) # decorator
 def home():
     books = db.session.query(Book).all()
     authors = db.session.query(Author).all()
@@ -70,7 +78,7 @@ def add_book():
 
     return render_template("add_book.html", message=message, authors=authors)
 
-
+#creates tables
 with app.app_context():
   db.create_all()
 
