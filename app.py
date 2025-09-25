@@ -23,8 +23,44 @@ db.init_app(app)
 @app.route("/", methods=["GET"]) # decorator
 def home():
     books = db.session.query(Book).all()
-    authors = db.session.query(Author).all()
-    return render_template("home.html", books=books, authors=authors)
+    return render_template("home.html", books=books)
+
+
+@app.route("/search", methods=["GET"])
+def search():
+    # get query parameters
+    search_for = request.args.get("search", "")
+    books = db.session.query(Book) \
+        .filter(Book.title.like(f"%{search_for}%")) \
+        .all()
+
+    if not books:
+        message = "Book not found"
+    else:
+        message = ""
+
+    return render_template("home.html", books=books, message=message)
+
+@app.route("/sorted", methods=["GET"])
+def sort():
+    sorted_list = []
+
+    # get books
+    books = db.session.query(Book).all()
+
+    # get query parameters
+    sort_by = request.args.get("sort", "title")
+
+    # sort list by title, author or year
+    if sort_by:
+        if sort_by == "title":
+            books.sort(key=lambda book: book.title)
+        elif sort_by == "author":
+            books.sort(key=lambda book: book.author.name)
+        elif sort_by == "year":
+            books.sort(key=lambda book: book.publication_year)
+
+    return render_template("home.html", books=books)
 
 
 @app.route("/add_author", methods=["GET", "POST"])
@@ -79,8 +115,8 @@ def add_book():
     return render_template("add_book.html", message=message, authors=authors)
 
 #creates tables
-with app.app_context():
-  db.create_all()
+# with app.app_context():
+#   db.create_all()
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)

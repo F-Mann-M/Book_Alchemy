@@ -1,6 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Column, Integer, String, Date, ForeignKey
-from sqlalchemy.orm import foreign
+
 
 db = SQLAlchemy()
 
@@ -30,7 +30,7 @@ class Book(db.Model):
     publication_year = db.Column(db.Integer)
     author_id = db.Column(db.Integer, ForeignKey("authors.id"))
 
-    # create  many to one relationship between books and author
+    # create many to one relationship between books and author
     author = db.relationship("Author", back_populates="books")
 
 
