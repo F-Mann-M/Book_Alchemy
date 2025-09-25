@@ -20,15 +20,23 @@
       </select>
       <button type="submit">Sort</button>
       </form>
+    <p><a href="/add_book"> Add book </a>| <a href="/add_author">Add author</a><p>
     {% if message %}
     <p>{{ message }}</p>
     {% endif %}
     {% for book in books %}
-    <div> <p><h3>{{ book.title }}</h3>
-      Publication year: {{ book.publication_year }}</br>
-      Author: {{ book.author.name }}</br></br>
-      <img src="https://covers.openlibrary.org/b/isbn/{{ book.isbn }}-M.jpg" />
-    </div>
+      <ul>
+        <li>
+          <div> <p><h3>{{ book.title }}</h3>
+            Publication year: {{ book.publication_year }}</br>
+            Author: {{ book.author.name }}</br>
+            <img src="https://covers.openlibrary.org/b/isbn/{{ book.isbn }}-M.jpg" /></br>
+            <form method="POST" action="/book/{{ book.id }}/delete" >
+              <button type="submit">Delete Book</button></br></br>
+            </form>
+          </div>
+        </li>
+      </ul>
     {% endfor %}
 
   </body>

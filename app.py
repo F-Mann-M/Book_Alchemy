@@ -1,5 +1,4 @@
 from flask import Flask, render_template, request
-from flask_sqlalchemy import SQLAlchemy
 from data_models import db, Author, Book
 import os
 from datetime import date
@@ -83,7 +82,7 @@ def add_author():
             date_of_death = date_of_death)
         db.session.add(new_author)
         db.session.commit()
-        message = f"Author {name} added successfully 'authors' table"
+        message = f"Author {name} added successfully to database."
 
     return render_template("add_author.html", message=message)
 
@@ -110,9 +109,26 @@ def add_book():
             author_id = author)
         db.session.add(new_book)
         db.session.commit()
-        message = f"Book '{title}' was successfully added to table 'books'."
+        message = f"Book '{title}' was successfully added to library."
 
-    return render_template("add_book.html", message=message, authors=authors)
+    return render_template("home.html", message=message, authors=authors)
+
+
+@app.route("/book/<int:book_id>/delete", methods=["POST"])
+def delete_book(book_id):
+
+    # delete book
+    book = db.session.query(Book).filter(Book.id == book_id).first() #make sure book is in database
+    if book:
+        db.session.delete(book)
+        db.session.commit()
+        message = f"The book '{book.title}' has been removed successfully!"
+    else:
+        message = "Book not found in database"
+
+    # fetch new list
+    books = db.session.query(Book).all()
+    return render_template("home.html", message=message, books=books)
 
 #creates tables
 # with app.app_context():
