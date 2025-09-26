@@ -13,7 +13,7 @@ class Author(db.Model):
     birth_date = db.Column(db.Date)
     date_of_death = db.Column(db.Date)
 
-    # create many to one relationship between author and books
+    # create one to many relationship between author and books
     books = db.relationship("Book", back_populates="author", cascade="all, delete-orphan")
 
 
