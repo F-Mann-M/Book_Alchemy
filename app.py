@@ -38,7 +38,7 @@ def search():
 
 @app.route("/sorted", methods=["GET"])
 def sort():
-    """ Get request and return sorted booklist"""
+    """ Get request and return sorted book list"""
     sorted_list = []
 
     # get books
@@ -63,8 +63,7 @@ def sort():
 def add_author():
     """
     Gets information about author from a html form (POST),
-    add data to author table,
-    get back to library (home)
+    add data to author table
     """
     message = "Add author."
     #get data from form
@@ -94,7 +93,6 @@ def add_book():
     If GET request render add_book.html,
     if POST request collect data about book,
     add data to author table
-    return to library (home)
     """
 
     message = "Add new Book"
